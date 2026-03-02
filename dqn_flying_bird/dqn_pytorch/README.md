@@ -1,14 +1,19 @@
 <a name="readme-top"></a>
 
-# Implement DQN in PyTorch - Beginner Tutorials
+# Reinforcement Learning: DQN Bird Environment
+This repository contains my implementation of a Deep Q-Network (DQN) agent designed to master the Flappy Bird environment.
 
-This repository contains an implementation of the DQN algorithm from my Deep Q-Learning, aka Deep Q-Network (DQN), YouTube ([@johnnycode](https://www.youtube.com/@johnnycode)) tutorial series. In this series, we code the DQN algorithm from scratch with Python and PyTorch, and then use it to train the Flappy Bird game. If you find the code and tutorials helpful, please consider supporting me:
+Project Overview
+The core logic of this DQN agent is based on the tutorial series by JohnnyCode (@johnnycode). I have adapted the scratch-built PyTorch implementation to explore how neural networks can approximate the optimal action-value function in a high-speed, discrete action space.
 
+Algorithm: Deep Q-Learning (DQN)
 
-If you are brand new to Reinforcement Learning, you may want to start with my Q-Learning tutorials first, then continue on to Deep Q-Learning: https://github.com/johnnycode8/gym_solutions
+Framework: PyTorch / Python
 
-## 1. Install FlappyBird Gymnasium & Setup Development Environment
-We'll set up our development environment on VSCode and Conda, and then install Flappy Bird Gymnasium, PyTorch, and Tensorflow (we'll use Tensorflow's TensorBoard to monitor training progress). There are 2 versions of Flappy Bird, one version provides the position of the last pipe, the next pipe, and the bird and the other version that provides RGB (image) frames. The RGB version requires a Convolutional Neural Network, which is more complicated, while the positional values version can be trained using a regular Neural Network. We'll start with the positional version and maybe tackle the RGB version in the future.
+Environment: Flappy Bird (Gym/Gymnasium)
+
+Acknowledgments
+Special thanks to JohnnyCode for the excellent Deep Q-Learning tutorial series. This project was built while following his guide on coding RL algorithms from scratch.
 
 <a href='https://youtu.be/arR7KzlYs4w&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi'><img src='https://img.youtube.com/vi/arR7KzlYs4w/0.jpg' width='400' alt='Install FlappyBird Gymnasium'/></a>
 
