@@ -6,9 +6,9 @@ This repository contains my implementation of a Deep Q-Network (DQN) agent desig
 Project Overview
 The core logic of this DQN agent is based on the tutorial series by JohnnyCode (@johnnycode). I have adapted the scratch-built PyTorch implementation to explore how neural networks can approximate the optimal action-value function in a high-speed, discrete action space.
 
-# Algorithm: Deep Q-Learning (DQN)
+Algorithm: Deep Q-Learning (DQN)
 
-# Framework: PyTorch / Python
+Framework: PyTorch / Python
 
 Environment: Flappy Bird (Gym/Gymnasium)
 
