@@ -4,8 +4,6 @@
 
 This repository contains an implementation of the DQN algorithm from my Deep Q-Learning, aka Deep Q-Network (DQN), YouTube ([@johnnycode](https://www.youtube.com/@johnnycode)) tutorial series. In this series, we code the DQN algorithm from scratch with Python and PyTorch, and then use it to train the Flappy Bird game. If you find the code and tutorials helpful, please consider supporting me:
 
-<a href='https://www.buymeacoffee.com/johnnycode'><img src="https://cdn.buymeacoffee.com/buttons/default-blue.png" alt="Buy Me A Coffee" height="41" width="174"></a>
-
 
 If you are brand new to Reinforcement Learning, you may want to start with my Q-Learning tutorials first, then continue on to Deep Q-Learning: https://github.com/johnnycode8/gym_solutions
 
