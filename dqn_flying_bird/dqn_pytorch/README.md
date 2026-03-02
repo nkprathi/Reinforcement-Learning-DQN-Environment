@@ -15,8 +15,6 @@ Environment: Flappy Bird (Gym/Gymnasium)
 Acknowledgments:
 Special thanks to JohnnyCode for the excellent Deep Q-Learning tutorial series. This project was built while following his guide on coding RL algorithms from scratch.
 
-<a href='https://youtu.be/arR7KzlYs4w&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi'><img src='https://img.youtube.com/vi/arR7KzlYs4w/0.jpg' width='400' alt='Install FlappyBird Gymnasium'/></a>
-
 ## 1.The Deep Q-Network (DQN) Architecture
 The "brain" of the agent is a standard Deep Neural Network consisting of fully connected layers. In this architecture, the input layer accepts the environmental state (the relative positions of the bird and the upcoming pipes), while the output layer predicts the expected Q-values for each possible action. By identifying the action with the highest Q-value for any given state, the agent determines the optimal move to maximize its long-term rewards.
 
