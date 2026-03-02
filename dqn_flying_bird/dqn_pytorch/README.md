@@ -6,68 +6,74 @@ This repository contains my implementation of a Deep Q-Network (DQN) agent desig
 Project Overview
 The core logic of this DQN agent is based on the tutorial series by JohnnyCode (@johnnycode). I have adapted the scratch-built PyTorch implementation to explore how neural networks can approximate the optimal action-value function in a high-speed, discrete action space.
 
-Algorithm: Deep Q-Learning (DQN)
+# Algorithm: Deep Q-Learning (DQN)
 
-Framework: PyTorch / Python
+# Framework: PyTorch / Python
 
 Environment: Flappy Bird (Gym/Gymnasium)
 
-Acknowledgments
+Acknowledgments:
 Special thanks to JohnnyCode for the excellent Deep Q-Learning tutorial series. This project was built while following his guide on coding RL algorithms from scratch.
 
 <a href='https://youtu.be/arR7KzlYs4w&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi'><img src='https://img.youtube.com/vi/arR7KzlYs4w/0.jpg' width='400' alt='Install FlappyBird Gymnasium'/></a>
 
-## 2. Implement the Deep Q-Network Module
- A Deep Q-Network is nothing more than a regular Neural Network with fully connected layers. This network is the brain of the bird. What makes this neural network special is that the network's input layer represents the State of the environment and the output layer represents the expected Q-values of the set of Actions. The State is a combination of the position of the last pipe, the next pipe, and the bird. The Action with the highest Q-value is the best Action for a given State.
+## 1.The Deep Q-Network (DQN) Architecture
+The "brain" of the agent is a standard Deep Neural Network consisting of fully connected layers. In this architecture, the input layer accepts the environmental state (the relative positions of the bird and the upcoming pipes), while the output layer predicts the expected Q-values for each possible action. By identifying the action with the highest Q-value for any given state, the agent determines the optimal move to maximize its long-term rewards.
 
-<a href='https://youtu.be/RVMpm86equc&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi'><img src='https://img.youtube.com/vi/RVMpm86equc/0.jpg' width='400' alt='Implement Deep Q-Network Module'/></a>
+## 2. Training Stability: Experience Replay & YAML Settings
+To ensure the model learns generalized patterns rather than just memorizing recent moves, I utilized Experience Replay. This technique involves saving "experiences" (state-action-reward-state sequences) and training the network on random samples from this history. This diversity in training data is crucial for reinforcement learning stability. For better project organization, I decoupled the model logic from the training variables by using a YAML file to load hyperparameters like learning rates and Epsilon values.
 
-## 3. Implement Experience Replay & Load Hyperparameters from YAML
-The concept of Experience Replay is to collect a large set of "experiences" so that the DQN can be trained using smaller samples. Experience Replay is essential because we need to show the neural network many examples of similar situations to help it learn general patterns. An "experience" consists of the current state, the action that was taken, the resulting new state, the reward that was received, and a flag to indicate if the new state is terminal. When training, we randomly sample from this memory to ensure diverse training data. We also create a separate hyperparameter file to manage parameters like replay memory size, training batch size, and Epsilon for the Epsilon-Greedy algorithm. This way, we can easily change these parameters for different environments.
+## 3. Implement Epsilon-Greedy & Debug the Training Loop
+Exploration Strategy and Training OptimizationTo balance the agent's learning, I implemented the $\epsilon$-greedy (Epsilon-Greedy) algorithm. This strategy manages the trade-off between exploration (attempting random maneuvers to discover new strategies) and exploitation (utilizing the model's current knowledge to maximize scores). 
 
-<a href='https://youtu.be/y3BSPfmMIkA&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi'><img src='https://img.youtube.com/vi/y3BSPfmMIkA/0.jpg' width='400' alt='Implement Experience Replay'/></a>
+Annealing Process: We initialize $\epsilon$ at 1.0 to ensure the bird starts with purely stochastic behavior. Over time, this value is decayed, gradually shifting the agent’s reliance toward its learned policy. 
 
-## 4. Implement Epsilon-Greedy & Debug the Training Loop
-The Epsilon-Greedy algorithm is use for exploration (bird taking random action) and exploitation (bird taking best known action at the moment). We start by initializing the Epsilon value to 1, so initially, the agent will choose 100% random actions. As the training progresses, we'll slowly decay Epsilon, making the agent more likely to select actions based on its learned policy. We'll also convert all necessary inputs to tensors before feeding them into our PyTorch-implemented DQN, so we could use CUDA (GPU) to train the network.
+Hardware Acceleration: To optimize performance, all environmental states are transformed into PyTorch Tensors. This allows the training loop to leverage CUDA-enabled GPUs, significantly accelerating the backpropagation process compared to CPU-only training.
 
-<a href='https://youtu.be/2zwbCPpp3do&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi'><img src='https://img.youtube.com/vi/2zwbCPpp3do/0.jpg' width='400' alt='Implement Epsilon-Greedy'/></a>
+## 5. Decoupling Learning with a Target Network
+A common challenge in Deep Q-Learning is the "moving target" problem, where the values we are trying to predict change every time we update the model. To solve this, I instantiated two identical architectures: the Policy Network and the Target Network.
 
-## 5. Implement the Target Network
-Using the DQN module from earlier, we instantiate a Policy Network and a Target Network. The Target Network starts off identical to the Policy Network. The Policy Network represents the brain of the bird; this is the network that we train. The Target Network is used to estimate target Q-values, which is used to train the Policy Network. While it is possible to use the Policy Network to perform the Q-value estimation, the Policy Network is constantly changing during training, so it is more stable to use a Target Network for estimation. After a number of steps (actions), we sync the two networks by copying the Policy Network's weights and biases into the Target Network.
+The Policy Network: This is the primary model that actively interacts with the Flappy Bird environment and undergoes continuous weight updates during the optimization step.
 
-<a href='https://youtu.be/vYRpJo-KMSw&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi'><img src='https://img.youtube.com/vi/vYRpJo-KMSw/0.jpg' width='400' alt='Implement Target Network'/></a>
+The Target Network: This network is used exclusively to generate the "ground truth" labels (target Q-values). By keeping this network's weights frozen and only synchronizing them with the Policy Network every $N$ steps, we provide a stable objective for the agent. This separation prevents the training from oscillating and ensures smoother mathematical convergence.
 
-## 6. Explain Loss, Backpropagation, and Gradient Descent
-In case you are not familar with how Neural Networks learn, this video explains the high-level process. The Loss (using Mean Squared Error function, as an example) measures how far our current policy's Q-values are from our target Q-values. Gradient Descent is used to calculate the slope (gradient) of the loss function, which provides an indication of the direction to adjust the weights and biases to lower loss. Backpropagation is the process of performing Gradient Descent and adjusting the weights and biases in the direction that minimizes the loss.
+## 6. Optimization Process: Understanding the Loss, Backpropagation, and Gradient Descent
 
-<a href='https://youtu.be/DEqh8rgkLcw&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi'><img src='https://img.youtube.com/vi/DEqh8rgkLcw/0.jpg' width='400' alt='Explain Loss, Backpropagation, Gradient Descent'/></a>
+To refine the agent's decision-making, the training loop relies on standard deep learning optimization techniques. We quantify the accuracy of our current policy using a Loss Function (typically Mean Squared Error), which calculates the discrepancy between the predicted Q-values and the target values derived from the Bellman equation.
 
-## 7. Optimize Target Network PyTorch Calculations
-In the implementation of the Target Network calculations from earlier, we're looping through a batch of experiences and calculating target Q-values for each one. That code is easy to read and understand, however, it is slow to execute because we're processing each experience one at a time. PyTorch is capable of processing the whole batch at once, which is much more efficient. We'll modify the code to take advantage of PyTorch's computational capabilities.
+Gradient Descent: This optimization algorithm calculates the gradient (slope) of the loss function relative to the network's parameters. This provides the mathematical "direction" needed to adjust the weights and biases to reduce error.
 
-<a href='https://youtu.be/kaXdV1pk8b4&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi'><img src='https://img.youtube.com/vi/kaXdV1pk8b4/0.jpg' width='400' alt='Optimize Target Network PyTorch Calculations'/></a>
+Backpropagation: Through this iterative process, the gradients are propagated backward through the network layers. By updating the internal parameters in the direction that minimizes the loss, the agent progressively "learns" to associate specific states with higher-reward actions.
 
-## 8. Test DQN Algorithm on CartPole-v1
-Reinforcement Learning is fragile as there are many factors that can cause training to fail. We want to make sure that the DQN code we have is bug free. We can test the DQN code on a simple environment that can give us feedback quickly. The Gymnasium Cart Pole environment is perfect for that. Once we are certain that the code is solid, we can finally train Flappy Bird!
+## 7. Computational Efficiency through Vectorization
+The initial implementation of the DQN update involved iterating through a batch of experiences one by one. While this approach is intuitive for learning the logic, it is computationally expensive as it fails to leverage modern hardware.
 
-<a href='https://youtu.be/Ejv8yv5-i0M&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi'><img src='https://img.youtube.com/vi/Ejv8yv5-i0M/0.jpg' width='400' alt='est DQN Algorithm on CartPole-v1'/></a>
+To significantly boost performance, I refactored the target Q-value calculations using Vectorized Operations in PyTorch. By treating the entire experience batch as a single multi-dimensional tensor, we utilize PyTorch’s optimized C++/CUDA backends. This parallel processing approach dramatically reduces the time per training step, allowing for faster convergence and more efficient use of GPU resources.
 
-## 9. Train DQN Algorithm on Flappy Bird!
-Finally, we can train our DQN algorithm on Flappy Bird! I'll show the results of a 24-hour training session. The bird can fly past quite a few pipe, however, it did not learn to fly indefinitely, that requires perhaps several days of training. I explain why it takes so long to train using DQN.
+## 8. Validation: Testing the DQN on the CartPole-v1 Environment
+Reinforcement Learning models are notoriously sensitive to hyperparameter tuning and small implementation errors. To ensure the core DQN logic was robust and bug-free, I first validated the algorithm on the Gymnasium CartPole-v1 environment.
 
-<a href='https://youtu.be/P7bnuiTVJS8&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi'><img src='https://img.youtube.com/vi/P7bnuiTVJS8/0.jpg' width='400' alt='Train DQN Algorithm on Flappy Bird'/></a>
+Because CartPole has a lower-dimensional state space and reaches a solution quickly, it serves as an ideal "unit test" for the agent's learning capabilities. Successfully solving this environment provided the necessary confidence to transition the architecture toward the more complex Flappy Bird task.
 
+## 9. Final Implementation: Training on Flappy Bird
+With the algorithm validated, the final phase involved deploying the DQN to master the Flappy Bird environment.
 
-## 10. Double DQN Explained and Implemented
-Since the introduction of DQN, there has been many enhancements to the algorithm. Double DQN (DDQN) was the first major enhancement. I explain the concept behind Double DQN using Flappy Bird as an example. The main objective of Double DQN is to reduce the time wasted exploring paths that don't lead to a good outcomes. However, it's important to note that DDQN may not always lead to significant performance gains in all environments.
+Performance Observations: After an intensive 24-hour training session, the agent successfully learned to navigate through multiple obstacles.
 
-<a href='https://youtu.be/FKOQTdcKkN4&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi'><img src='https://img.youtube.com/vi/FKOQTdcKkN4/0.jpg' width='400' alt='Double DQN Explained and Implemented'/></a>
+Training Challenges: While the bird achieved high proficiency, reaching a state of "infinite flight" would likely require several days of continuous training. This extended timeline is a characteristic of DQN training, largely due to the high variance in rewards and the complexity of the pixel-based or coordinate-based state transitions in this specific environment.
 
+## 10. Enhancing Stability: Double DQN (DDQN)
+Since the original DQN paper, several architectural improvements have been introduced to address its limitations. Double DQN (DDQN) was a primary milestone in this evolution.
 
-## 11. Dueling DQN Explained and Implemented
-Dueling Architecture or Dueling DQN is another enhancement to the DQN algorithm. The main objective of Dueling DQN is to improve training efficiency by splitting the Q-values into two components: Value and Advantages. I explain the concept behind Dueling DQN using Flappy Bird as an example and also implement the Dueling Architecture changes in the DQN module.
+The Core Issue: Standard DQN often suffers from overestimation bias, where the agent assigns unrealistically high Q-values to certain actions, leading to inefficient exploration of suboptimal paths.
 
-<a href='https://youtu.be/3ILECq5qxSk&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi'><img src='https://img.youtube.com/vi/3ILECq5qxSk/0.jpg' width='400' alt='Dueling DQN Explained and Implemented'/></a>
+The Solution: DDQN decouples the action selection from the action evaluation. By using the Policy Network to select the best action and the Target Network to evaluate its value, the agent avoids "wasted" training time on paths that do not yield high rewards. While DDQN provides a more stable learning curve in Flappy Bird, its performance gains can vary depending on the specific environmental stochasticity.
 
+## 11. Structural Optimization: Dueling DQN Architecture
+The Dueling Network Architecture is a further refinement designed to accelerate training efficiency without changing the underlying reinforcement learning algorithm.
+
+Decomposition of Q-Values: Instead of estimating a single Q-value for each action, this architecture splits the network's output into two separate streams:
+1. State-Value ($V$): The value of being in a specific state.
+2. Advantage ($A$): The relative importance of each action compared to others in that state.Benefits: By combining these two streams at the final layer, the model learns which states are inherently valuable, regardless of which action is taken. This is particularly useful in environments like Flappy Bird, where many actions (e.g., not flapping when far from a pipe) have no immediate impact on the outcome. I have integrated this Dueling logic directly into the modular DQN component of this project.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
